@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-// This is a sub-component used only within HomePage.
+// Read base URL from .env
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const ProductCard = ({ product }) => (
   <div className="bg-white rounded-lg shadow-lg overflow-hidden group">
     <div className="relative">
-      {/* FIX: Use the first image from the 'images' array and provide a placeholder fallback */}
-      <img 
-        src={product.images && product.images.length > 0 ? product.images[0] : 'https://placehold.co/600x400?text=No+Image'} 
-        alt={product.name} 
-        className="w-full h-64 object-cover" 
+      <img
+        src={product.images?.[0] || 'https://placehold.co/600x400?text=No+Image'}
+        alt={product.name}
+        className="w-full h-64 object-cover"
       />
       <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <Link
@@ -23,7 +24,6 @@ const ProductCard = ({ product }) => (
     </div>
     <div className="p-4">
       <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-      {/* This correctly handles the price format from MongoDB */}
       <p className="text-gray-700 mt-1">${Number(product.price?.$numberDecimal || product.price).toFixed(2)}</p>
     </div>
   </div>
@@ -38,36 +38,26 @@ const HomePage = () => {
     const fetchFeatured = async () => {
       try {
         setLoading(true);
-        // --- FIX: Corrected the axios call ---
-        // 1. Removed the incorrect second URL argument.
-        // 2. Changed the endpoint to '/api/products/top' to efficiently fetch only top products.
-        const { data } = await axios.get('https://sovereign-woodcraft-v2.onrender.com/api/products/featured');
+        const { data } = await axios.get(`${API_BASE_URL}/api/products/featured`);
         setFeaturedProducts(data);
       } catch (err) {
         console.error('Failed to load featured products', err);
         setError('Could not load featured products. Please try again later.');
-        // Ensure featuredProducts is an array even on error to prevent .map crash
-        setFeaturedProducts([]); 
+        setFeaturedProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchFeatured();
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
-  // --- Conditional Rendering ---
-  // Display loading or error messages while fetching data.
   const renderContent = () => {
-    if (loading) {
-      return <p className="text-center">Loading products...</p>;
-    }
-    if (error) {
-      return <p className="text-center text-red-500">{error}</p>;
-    }
-    if (featuredProducts.length === 0) {
-        return <p className="text-center">No featured products available at the moment.</p>
-    }
+    if (loading) return <p className="text-center">Loading products...</p>;
+    if (error) return <p className="text-center text-red-500">{error}</p>;
+    if (featuredProducts.length === 0)
+      return <p className="text-center">No featured products available at the moment.</p>;
+
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {featuredProducts.map(product => (
@@ -80,12 +70,13 @@ const HomePage = () => {
   return (
     <div className="bg-gray-50">
       <main>
-        {/* Hero Section */}
-        <section 
+        <section
           className="relative h-[60vh] bg-cover bg-center flex items-center justify-center text-white"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&q=80')" }}
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&q=80')",
+          }}
         >
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/50" />
           <div className="relative text-center z-10 px-4">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">Timeless Furniture, Handcrafted for You</h1>
             <p className="text-lg md:text-xl mb-8">Discover pieces that tell a story.</p>
@@ -97,7 +88,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Featured Products Section */}
         <section className="py-16">
           <div className="container mx-auto px-6">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">Featured Products</h2>

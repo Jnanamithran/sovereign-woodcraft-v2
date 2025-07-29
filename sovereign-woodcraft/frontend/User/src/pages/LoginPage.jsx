@@ -1,9 +1,10 @@
-// /frontend/src/pages/LoginPage.jsx
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
+
+// 👇 Read API base URL from Vite env
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ const LoginPage = () => {
       setError('');
 
       const { data } = await axios.post(
-        'http://localhost:5001/api/auth/login',
+        `${API_BASE_URL}/api/auth/login`, // ✅ Now dynamic
         { email, password },
         {
           headers: { 'Content-Type': 'application/json' },
@@ -55,7 +56,8 @@ const LoginPage = () => {
           <div className="text-center mb-8">
             <div className="mx-auto w-20 h-20 bg-gradient-to-br from-amber-600 to-amber-800 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Sovereign Woodcraft</h1>
@@ -90,7 +92,7 @@ const LoginPage = () => {
               <div className="relative">
                 <Lock className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   id="password"
                   className="w-full pl-12 pr-12 py-4 bg-gray-50/50 border border-gray-200 rounded-xl"
                   placeholder="Enter your password"
@@ -103,13 +105,18 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full bg-amber-700 text-white py-3 rounded-xl hover:bg-amber-800 transition-all">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-amber-700 text-white py-3 rounded-xl hover:bg-amber-800 transition-all"
+            >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
           <p className="text-sm text-center mt-6 text-gray-600">
-            Don't have an account? <Link to="/register" className="text-amber-600 font-semibold">Register</Link>
+            Don't have an account?{' '}
+            <Link to="/register" className="text-amber-600 font-semibold">Register</Link>
           </p>
         </div>
       </div>
