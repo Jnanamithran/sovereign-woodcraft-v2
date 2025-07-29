@@ -18,34 +18,33 @@ connectDB();
 
 const app = express();
 
+
 // --- REVISED: More Robust CORS Configuration ---
 
-// This list contains the URLs that are allowed to make requests to your API.
 const allowedOrigins = [
   'http://localhost:5173', // Your local frontend for development
   'https://sovereign-woodcraft-v2.vercel.app' // Your Vercel frontend URL
 ];
 
-// We configure CORS here. This is like a security guard for your API.
-app.use(cors({
-  // The 'origin' property tells the security guard who is allowed to talk to the API.
+const corsOptions = {
   origin: function (origin, callback) {
-    // 'origin' is the URL of the website making the request (e.g., your Vercel app).
-    
-    // We check if the incoming 'origin' is in our 'allowedOrigins' list.
-    // We also allow requests that don't have an origin (like from Postman or other tools).
+    // Allow requests with no origin (like mobile apps or curl requests) or from our allowed list.
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      // If the origin is in our list (or if there's no origin), we allow the request.
-      // The 'callback(null, true)' means "no error, access is granted."
       callback(null, true);
     } else {
-      // If the origin is NOT in our list, we block the request.
-      // The 'callback(new Error(...))' means "there was an error, access is denied."
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true, // This allows the frontend to send cookies with its requests.
-}));
+};
+
+// --- FIX: Handle Preflight Requests ---
+// The browser sends a preflight 'OPTIONS' request to check if CORS is supported.
+// This line ensures that for any route, we handle this pre-check immediately.
+app.options('*', cors(corsOptions));
+
+// Now, use the CORS options for all other requests
+app.use(cors(corsOptions));
 
 
 // Middleware to parse incoming JSON and URL-encoded data
