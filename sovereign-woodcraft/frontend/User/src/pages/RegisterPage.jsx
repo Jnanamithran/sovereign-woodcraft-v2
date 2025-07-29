@@ -39,6 +39,7 @@ const RegisterPage = () => {
       // Include name in the user data payload
       const { data } = await axios.post(
         'http://localhost:5001/api/auth/register',
+        'https://sovereign-woodcraft-v2.onrender.com/api/products',
         { name, email, password },
         config
       );

@@ -22,7 +22,7 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
     try {
-      const { data } = await axios.post('http://localhost:5001/api/auth/login', { email, password });
+      const { data } = await axios.post('http://localhost:5001/api/auth/login', 'https://sovereign-woodcraft-v2.onrender.com/api/products',{ email, password });
       localStorage.setItem('userInfo', JSON.stringify(data));
       setLoading(false);
       navigate('/');

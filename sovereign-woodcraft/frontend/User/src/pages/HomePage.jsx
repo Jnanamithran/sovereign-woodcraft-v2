@@ -28,7 +28,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5001/api/products');
+        const { data } = await axios.get('http://localhost:5001/api/products','https://sovereign-woodcraft-v2.onrender.com/api/products');
         setFeaturedProducts(data.slice(0, 4)); // Only show top 4
       } catch (error) {
         console.error('Failed to load featured products', error);
