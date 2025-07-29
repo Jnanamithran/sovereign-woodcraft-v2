@@ -1,6 +1,6 @@
 // /routes/productRoutes.js
 import express from 'express';
-import Product from '../models/productModel.js';
+import Product from '../models/ProductModel.js';
 import { protect } from '../middleware/authMiddleware.js'; // Assuming you have this
 
 const router = express.Router();
