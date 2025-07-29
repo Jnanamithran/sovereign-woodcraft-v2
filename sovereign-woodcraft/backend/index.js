@@ -18,28 +18,35 @@ connectDB();
 
 const app = express();
 
-// --- FIX: Updated CORS Configuration for Vercel ---
+// --- REVISED: More Robust CORS Configuration ---
+
 // This list contains the URLs that are allowed to make requests to your API.
 const allowedOrigins = [
   'http://localhost:5173', // Your local frontend for development
-  // IMPORTANT: Replace this placeholder with your actual Vercel frontend URL
-  'https://sovereign-woodcraft-v2.vercel.app' 
+  'https://sovereign-woodcraft-v2.vercel.app' // Your Vercel frontend URL
 ];
 
-// Enable CORS (Cross-Origin Resource Sharing)
+// We configure CORS here. This is like a security guard for your API.
 app.use(cors({
+  // The 'origin' property tells the security guard who is allowed to talk to the API.
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    // If the request origin is in our allowed list, allow it.
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    // 'origin' is the URL of the website making the request (e.g., your Vercel app).
+    
+    // We check if the incoming 'origin' is in our 'allowedOrigins' list.
+    // We also allow requests that don't have an origin (like from Postman or other tools).
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      // If the origin is in our list (or if there's no origin), we allow the request.
+      // The 'callback(null, true)' means "no error, access is granted."
+      callback(null, true);
+    } else {
+      // If the origin is NOT in our list, we block the request.
+      // The 'callback(new Error(...))' means "there was an error, access is denied."
+      callback(new Error('Not allowed by CORS'));
     }
-    return callback(null, true);
   },
-  credentials: true, // Allows cookies and authorization headers to be sent
+  credentials: true, // This allows the frontend to send cookies with its requests.
 }));
+
 
 // Middleware to parse incoming JSON and URL-encoded data
 app.use(express.json()); // Parses incoming requests with JSON payloads
@@ -60,21 +67,18 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 // Serve the 'uploads' directory as a static folder.
-// This allows you to access uploaded files directly via URL (e.g., http://localhost:5001/uploads/image.jpg)
 app.use('/uploads', express.static(uploadsDir));
 
 
 // --- Root Route Handler ---
-// This tells the server what to do when someone visits the base URL (e.g., "https://your-app.onrender.com/")
 app.get('/', (req, res) => {
   res.send('API is running successfully...');
 });
 
 
 // --- Custom Error Handling Middleware ---
-// These must be last, after all other routes and middleware.
-app.use(notFound); // Handles requests for routes that don't exist (404 Not Found)
-app.use(errorHandler); // A general-purpose error handler for other server errors
+app.use(notFound);
+app.use(errorHandler);
 
 // --- Start the Server ---
 const PORT = process.env.PORT || 5001;
