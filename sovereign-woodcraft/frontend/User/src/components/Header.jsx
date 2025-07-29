@@ -18,8 +18,14 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const dropdownRef = useRef();
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
   const { cartCount } = useCart();
+
+  let userInfo = null;
+  try {
+    userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  } catch (e) {
+    userInfo = null;
+  }
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -32,8 +38,7 @@ const Header = () => {
 
   const logoutHandler = () => {
     localStorage.removeItem('userInfo');
-    navigate('/login');
-    window.location.reload();
+    navigate('/login', { replace: true });
   };
 
   useEffect(() => {
@@ -43,13 +48,14 @@ const Header = () => {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center relative">
-        {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
           <svg className="h-10 w-10 text-amber-800" viewBox="0 0 24 24" fill="none">
             <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="2" />
@@ -59,7 +65,6 @@ const Header = () => {
           <span className="text-2xl font-bold text-amber-800 hidden sm:inline">Sovereign Woodcraft</span>
         </Link>
 
-        {/* Navigation - Desktop */}
         <nav className="hidden lg:flex items-center space-x-6">
           <Link to="/" className="text-gray-700 hover:text-amber-600">Home</Link>
           <Link to="/shop" className="text-gray-700 hover:text-amber-600">Shop</Link>
@@ -67,17 +72,15 @@ const Header = () => {
           <Link to="/contact" className="text-gray-700 hover:text-amber-600">Contact</Link>
         </nav>
 
-        {/* Right Icons */}
         <div className="flex items-center space-x-3 sm:space-x-4" ref={dropdownRef}>
-          {/* Mobile Search Icon */}
           <button
+            type="button"
             className="lg:hidden text-gray-700 hover:text-amber-600 p-2"
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
           >
             <Search size={24} />
           </button>
 
-          {/* Desktop Search Bar */}
           <form onSubmit={handleSearchSubmit} className="relative hidden md:block">
             <input
               type="search"
@@ -91,7 +94,6 @@ const Header = () => {
             </button>
           </form>
 
-          {/* Cart Icon */}
           <Link to="/cart" className="relative text-gray-700 hover:text-amber-600 p-2 rounded-full hover:bg-gray-100">
             <ShoppingCart size={24} />
             {cartCount > 0 && (
@@ -101,21 +103,18 @@ const Header = () => {
             )}
           </Link>
 
-          {/* User Info or Login */}
           {userInfo ? (
             <div className="relative">
               <button
+                type="button"
                 onClick={() => setShowDropdown((prev) => !prev)}
                 className="flex items-center text-gray-700 hover:text-amber-600"
               >
-                {/* Mobile: Show User Icon */}
                 <span className="sm:hidden p-2">
                   <User size={24} />
                 </span>
-                
-                {/* Desktop: Show Name and Chevron */}
                 <span className="hidden sm:flex items-center">
-                  <span>Hi, {userInfo.name.split(' ')[0]}</span>
+                  <span>Hi, {userInfo?.name?.split?.(' ')[0] || 'User'}</span>
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </span>
               </button>
@@ -125,6 +124,7 @@ const Header = () => {
                   <Link to="/orders" className="block px-4 py-2 hover:bg-gray-100">Your Orders</Link>
                   <Link to="/address" className="block px-4 py-2 hover:bg-gray-100">Your Address</Link>
                   <button
+                    type="button"
                     onClick={logoutHandler}
                     className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
                   >
@@ -140,8 +140,8 @@ const Header = () => {
             </Link>
           )}
 
-          {/* Mobile Menu Toggle */}
           <button
+            type="button"
             className="lg:hidden text-gray-700 hover:text-amber-600 p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -150,7 +150,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Search */}
       {mobileSearchOpen && (
         <div className="md:hidden px-4 pb-2">
           <form onSubmit={handleSearchSubmit}>
@@ -165,7 +164,6 @@ const Header = () => {
         </div>
       )}
 
-      {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-t px-4 py-3 space-y-2">
           <Link to="/" className="block text-gray-700 hover:text-amber-600">Home</Link>

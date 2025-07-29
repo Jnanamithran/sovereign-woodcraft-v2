@@ -16,7 +16,7 @@ const StarRating = ({ rating, reviewCount }) => (
         />
       ))}
     </div>
-    {reviewCount && (
+    {reviewCount > 0 && (
       <span className="text-sm text-gray-500">{reviewCount} reviews</span>
     )}
   </div>
@@ -26,7 +26,7 @@ const ProductDetailPage = () => {
   const { id: productId } = useParams();
   const { addItem } = useCart();
   
-  // State for product data
+  // State for product data, loading status, and errors
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -55,13 +55,16 @@ const ProductDetailPage = () => {
         const { data } = await axios.get(`/api/products/${productId}`);
         setProduct(data);
         // Set default selections
-        setSelectedImage(data.images?.[0] || '');
-        setSelectedColor(data.options?.colors?.[0] || '');
-        setSelectedSize(data.options?.sizes?.[0] || '');
+        if (data.images && data.images.length > 0) setSelectedImage(data.images[0]);
+        if (data.options?.colors?.length > 0) setSelectedColor(data.options.colors[0]);
+        if (data.options?.sizes?.length > 0) setSelectedSize(data.options.sizes[0]);
         setLoading(false);
         setSuccessReview(false); // Reset review success state
       } catch (err) {
-        setError('Failed to load product. It may not exist.');
+        // --- FIX: Display a more specific error message ---
+        // This will show the error sent from your backend if available,
+        // otherwise it will show a generic message.
+        setError(err.response?.data?.message || 'Failed to load product. It may not exist.');
         setLoading(false);
       }
     };
@@ -102,9 +105,11 @@ const ProductDetailPage = () => {
     }
   };
 
+  // --- Conditional Rendering ---
+  // These checks prevent errors if the data isn't ready yet.
   if (loading) return <div className="text-center py-20">Loading...</div>;
   if (error) return <div className="text-center text-red-600 py-20">{error}</div>;
-  if (!product) return null;
+  if (!product) return null; // Don't render anything if there's no product
 
   return (
     <div className="bg-gray-50 font-sans">

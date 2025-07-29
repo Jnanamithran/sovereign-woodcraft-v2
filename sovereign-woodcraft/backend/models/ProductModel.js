@@ -1,49 +1,26 @@
-// /models/productModel.js
 import mongoose from 'mongoose';
 
-// Create a new schema specifically for reviews
-const reviewSchema = mongoose.Schema(
-  {
-    name: { type: String, required: true }, // User's name
-    rating: { type: Number, required: true }, // 1-5 stars
-    comment: { type: String, required: true },
-    user: {
-      // Link to the user who wrote the review
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: 'User', // Assumes you have a 'User' model
-    },
-  },
-  {
-    timestamps: true, // Adds createdAt and updatedAt timestamps
-  }
-);
+const reviewSchema = new mongoose.Schema({
+  name: String,
+  rating: Number,
+  comment: String,
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+}, { timestamps: true });
 
-const productSchema = mongoose.Schema(
-  {
-    // ... your existing fields like name, brand, description, etc.
-    name: { type: String, required: true },
-    brand: { type: String, required: true },
-    // ... other fields
-
-    // --- ADD/UPDATE THESE FIELDS ---
-    reviews: [reviewSchema], // An array of review documents
-    rating: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    numReviews: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    // --- END OF ADDITIONS ---
+const productSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  brand: String,
+  description: String,
+  price: { type: mongoose.Types.Decimal128, required: true },
+  images: [String],
+  options: {
+    colors: [String],
+    sizes: [String],
   },
-  {
-    timestamps: true,
-  }
-);
+  reviews: [reviewSchema],
+  rating: { type: Number, default: 0 },
+  numReviews: { type: Number, default: 0 },
+}, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);
 export default Product;

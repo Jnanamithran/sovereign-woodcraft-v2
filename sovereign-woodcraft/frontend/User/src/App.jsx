@@ -18,7 +18,7 @@ const App = () => {
   let userInfo = null;
   try {
     userInfo = JSON.parse(localStorage.getItem('userInfo'));
-  } catch (err) {
+  } catch {
     console.error('Invalid userInfo in localStorage');
   }
 

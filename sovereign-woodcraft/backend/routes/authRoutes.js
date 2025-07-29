@@ -1,9 +1,11 @@
+// backend/routes/authRoutes.js
+
 import express from 'express';
+import { registerUser, authUser } from '../controllers/authController.js';
+
 const router = express.Router();
 
-// Temporary route to confirm the file is loaded correctly
-router.post('/login', (req, res) => {
-  res.send('Auth routes are working');
-});
+router.post('/register', registerUser);
+router.post('/login', authUser);
 
 export default router;
