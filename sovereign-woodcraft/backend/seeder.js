@@ -1,24 +1,21 @@
-// /backend/seeder.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import Product from './models/ProductModel.js'; // Create this model if not already
-import connectDB from './config/db.js';
+import Product from './models/ProductModel.js';
+import products from './data/products.js'; // Your product seed data
 
 dotenv.config();
-connectDB();
 
-const sampleProducts = [ /* paste above JSON here */ ];
-
-const importData = async () => {
+const seedData = async () => {
   try {
-    await Product.deleteMany(); // Optional: clean existing products
-    await Product.insertMany(sampleProducts);
-    console.log('Sample products imported!');
+    await mongoose.connect(process.env.MONGO_URI);
+    await Product.deleteMany(); // optional: clean existing data
+    await Product.insertMany(products);
+    console.log('✅ Data seeded');
     process.exit();
   } catch (error) {
-    console.error(error);
+    console.error('❌ Seeding failed:', error.message);
     process.exit(1);
   }
 };
 
-importData();
+seedData();

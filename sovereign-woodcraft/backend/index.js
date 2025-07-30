@@ -1,9 +1,9 @@
+// /backend/index.js
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -12,50 +12,48 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 dotenv.config();
 const app = express();
 
-// === CORS CONFIG ===
-const allowedOrigins = [
-  'http://localhost:5173', // Dev frontend
-  'https://sovereign-woodcraft-v2.vercel.app', // Hosted frontend
-];
-
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
-
-// === BODY PARSERS ===
+// === Middleware ===
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// === ROUTES ===
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/users', userRoutes);
+// === CORS Configuration ===
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://sovereign-woodcraft-v2.vercel.app',
+];
 
-// === ERROR HANDLING ===
-app.use(notFound);
-app.use(errorHandler);
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
-// === DATABASE CONNECTION ===
+// === MongoDB Connection ===
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      dbName: 'sovereign-woodcraft', // optional
-    });
+    await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ MongoDB connected');
-  } catch (err) {
-    console.error('❌ MongoDB connection failed:', err.message);
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:', error.message);
     process.exit(1);
   }
 };
 
-// === START SERVER ===
+// === Routes ===
+app.get('/', (req, res) => res.send('API is running...'));
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
+
+// === Error Handlers ===
+app.use(notFound);
+app.use(errorHandler);
+
+// === Server ===
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, async () => {
   await connectDB();
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

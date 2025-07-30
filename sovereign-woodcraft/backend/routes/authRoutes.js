@@ -1,5 +1,4 @@
-// backend/routes/authRoutes.js
-
+// /backend/routes/authRoutes.js
 import express from 'express';
 import { registerUser, authUser } from '../controllers/authController.js';
 
