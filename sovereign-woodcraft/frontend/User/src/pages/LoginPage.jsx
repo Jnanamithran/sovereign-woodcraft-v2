@@ -27,7 +27,8 @@ const LoginPage = () => {
       setError('');
 
       const { data } = await axios.post(
-        `${API_BASE_URL}/api/auth/login`, // ✅ Now dynamic
+        // ✅ This line was corrected
+        `${API_BASE_URL}/api/users/login`, 
         { email, password },
         {
           headers: { 'Content-Type': 'application/json' },

@@ -14,6 +14,11 @@ import CartPage from './pages/CartPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 
+// New pages
+import ProfilePage from './pages/ProfilePage.jsx';
+import OrdersPage from './pages/OrdersPage.jsx';
+import AddressPage from './pages/AddressPage.jsx';
+
 const App = () => {
   let userInfo = null;
   try {
@@ -24,7 +29,7 @@ const App = () => {
 
   return (
     <Routes>
-      {/* Routes that include header/footer layout */}
+      {/* Routes with header/footer layout */}
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="shop" element={<ShopPage />} />
@@ -33,11 +38,25 @@ const App = () => {
         <Route path="cart" element={<CartPage />} />
         <Route path="product/:id" element={<ProductDetailPage />} />
 
-        {/* ✅ Moved catch-all inside layout */}
+        {/* Protected routes */}
+        <Route
+          path="profile"
+          element={userInfo ? <ProfilePage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="orders"
+          element={userInfo ? <OrdersPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="address"
+          element={userInfo ? <AddressPage /> : <Navigate to="/login" replace />}
+        />
+
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
 
-      {/* Standalone routes (outside of layout) */}
+      {/* Standalone routes */}
       <Route
         path="/login"
         element={!userInfo ? <LoginPage /> : <Navigate to="/" replace />}

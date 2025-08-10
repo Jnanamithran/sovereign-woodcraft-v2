@@ -2,28 +2,27 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Upload, CheckCircle, AlertCircle, Loader, XCircle } from 'lucide-react';
 
-// In a real app, these would come from an environment variable (e.g., process.env.REACT_APP_API_URL)
-const API_BASE_URL = 'http://localhost:5001'; // Example base URL
-const API_UPLOAD_URL = `${API_BASE_URL}/api/upload/multiple`;
-const API_PRODUCTS_URL = `${API_BASE_URL}/api/products`;
+// Use process.env.NODE_ENV to determine the API URL.
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+    ? 'https://sovereign-woodcraft-v2.onrender.com'
+    : 'http://localhost:5001';
 
 const AddProductPage = () => {
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
+    const [brand, setBrand] = useState(''); // ✅ Added brand state
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('Chairs');
-    const [images, setImages] = useState([]); // State for an array of file objects
-    const [imagePreviews, setImagePreviews] = useState([]); // State for an array of image preview URLs
+    const [images, setImages] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
     const [countInStock, setCountInStock] = useState(0);
+    const [isActive, setIsActive] = useState(true); // ✅ Added isActive state
+    const [isFeatured, setIsFeatured] = useState(false); // ✅ Added isFeatured state
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    /**
-     * Handles the file input change event for multiple files.
-     * Appends new files and their preview URLs to the existing state arrays.
-     */
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length > 0) {
@@ -35,15 +34,10 @@ const AddProductPage = () => {
         }
     };
 
-    /**
-     * Removes a selected image and its preview before upload.
-     * @param {number} index - The index of the image to remove.
-     */
     const handleRemoveImage = (index) => {
         const newImages = [...images];
         const newImagePreviews = [...imagePreviews];
         
-        // Revoke the object URL to free up memory before removing it
         URL.revokeObjectURL(imagePreviews[index]);
 
         newImages.splice(index, 1);
@@ -53,10 +47,6 @@ const AddProductPage = () => {
         setImagePreviews(newImagePreviews);
     };
 
-    /**
-     * Handles the form submission.
-     * It first uploads all images, then creates the product with the returned image URLs.
-     */
     const submitHandler = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -69,50 +59,38 @@ const AddProductPage = () => {
             return;
         }
 
-        // 1. Upload all image files
-        const formData = new FormData();
-        images.forEach(imageFile => {
-            formData.append('images', imageFile); // Backend must be able to handle an array of 'images'
-        });
-
         try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            if (!userInfo || !userInfo.token) {
-                throw new Error('You must be logged in to add a product.');
-            }
-            const { token } = userInfo;
+            const formData = new FormData();
+            images.forEach(imageFile => {
+                formData.append('images', imageFile);
+            });
 
             const uploadConfig = {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
             };
 
-            const { data: uploadData } = await axios.post(API_UPLOAD_URL, formData, uploadConfig);
-            const imageUrls = uploadData.imageUrls; // Server should return an array of URLs
+            const { data: uploadData } = await axios.post(`${API_BASE_URL}/api/upload/multiple`, formData, uploadConfig);
+            const imageUrls = uploadData.imageUrls;
 
-            // 2. Create the new product with the returned image URLs
-            const productConfig = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            };
-            const productData = { name, price, description, category, imageUrls, countInStock };
-            await axios.post(API_PRODUCTS_URL, productData, productConfig);
+            // ✅ Include the new fields in the product data
+            const productData = { name, price, brand, description, category, imageUrls, countInStock, isActive, isFeatured };
+            
+            await axios.post(`${API_BASE_URL}/api/products`, productData, { withCredentials: true });
             
             setSuccess('Product added successfully! Clearing form...');
             
-            // Clear form fields after a short delay to allow user to see success message
             setTimeout(() => {
                 setName('');
                 setPrice('');
+                setBrand(''); // ✅ Clear brand
                 setDescription('');
                 setCategory('Chairs');
                 setImages([]);
                 setImagePreviews([]);
                 setCountInStock(0);
+                setIsActive(true); // ✅ Reset switches
+                setIsFeatured(false);
                 if(document.getElementById('image-upload')) {
                     document.getElementById('image-upload').value = null;
                 }
@@ -120,11 +98,22 @@ const AddProductPage = () => {
             }, 2000);
 
         } catch (err) {
-            setError(err.response?.data?.message || err.message || 'Failed to add product.');
+            setError(err.response?.data?.message || 'Failed to add product.');
         } finally {
             setLoading(false);
         }
     };
+
+    // Custom Switch Component for toggles
+    const ToggleSwitch = ({ label, checked, onChange }) => (
+        <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">{label}</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={checked} onChange={onChange} className="sr-only peer" />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-amber-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+            </label>
+        </div>
+    );
 
     return (
         <div className="bg-gray-50 p-4 sm:p-6 lg:p-8 min-h-screen">
@@ -145,12 +134,22 @@ const AddProductPage = () => {
                     )}
                     <form onSubmit={submitHandler} className="space-y-6">
                         <div><label htmlFor="name" className="block text-sm font-medium text-gray-700">Product Name</label><input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500" /></div>
+                        
+                        {/* ✅ Added Brand Input */}
+                        <div><label htmlFor="brand" className="block text-sm font-medium text-gray-700">Brand</label><input type="text" id="brand" value={brand} onChange={(e) => setBrand(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500" /></div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label htmlFor="price" className="block text-sm font-medium text-gray-700">Price ($)</label><input type="number" id="price" value={price} onChange={(e) => setPrice(e.target.value)} required min="0" step="0.01" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500" /></div>
                             <div><label htmlFor="countInStock" className="block text-sm font-medium text-gray-700">Count In Stock</label><input type="number" id="countInStock" value={countInStock} onChange={(e) => setCountInStock(e.target.value)} required min="0" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500" /></div>
                         </div>
                         <div><label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label><textarea id="description" rows="4" value={description} onChange={(e) => setDescription(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"></textarea></div>
                         <div><label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label><select id="category" value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"><option>Chairs</option><option>Tables</option><option>Shelving</option><option>Desks</option><option>Accessories</option></select></div>
+
+                        {/* ✅ Added Toggle Switches */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                            <ToggleSwitch label="Product is Active" checked={isActive} onChange={() => setIsActive(!isActive)} />
+                            <ToggleSwitch label="Product is Featured" checked={isFeatured} onChange={() => setIsFeatured(!isFeatured)} />
+                        </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Product Images</label>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { LayoutDashboard, PackagePlus, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, PackagePlus, ShoppingCart, LogOut, Menu, X, List, Settings } from 'lucide-react';
 
 /**
  * AdminLayout Component
@@ -28,8 +28,16 @@ const AdminLayout = () => {
                 <Link to="/add-product" className="flex items-center mt-2 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
                     <PackagePlus className="mr-3" /> Add Product
                 </Link>
+                {/* ✅ New Link */}
+                <Link to="/product-management" className="flex items-center mt-2 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                    <Settings className="mr-3" /> Product Management
+                </Link>
                 <Link to="/orders" className="flex items-center mt-2 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
                     <ShoppingCart className="mr-3" /> Orders
+                </Link>
+                 {/* ✅ New Link */}
+                <Link to="/activity-log" className="flex items-center mt-2 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                    <List className="mr-3" /> Activity Log
                 </Link>
             </nav>
             <div className="p-4">

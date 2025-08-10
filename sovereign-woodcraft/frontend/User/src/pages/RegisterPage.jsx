@@ -34,7 +34,8 @@ const RegisterPage = () => {
       setError('');
 
       const { data } = await axios.post(
-        `${API_BASE_URL}/api/auth/register`, // ✅ Dynamic backend URL
+        // ✅ This line was corrected
+        `${API_BASE_URL}/api/users`, 
         { name, email, password },
         {
           headers: { 'Content-Type': 'application/json' },
