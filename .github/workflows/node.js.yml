@@ -1,4 +1,4 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# This workflow will install dependencies, build, and test the three separate projects (backend, admin frontend, user frontend)
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
 name: Node.js CI
@@ -16,16 +16,56 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [20.x] # It's often better to test against a single, stable LTS version in CI
+        # You can add back [18.x, 22.x] if you need to test against multiple versions
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Check out repository code
+      uses: actions/checkout@v4
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+        # This line helps the cache find all of your package-lock.json files
+        cache-dependency-path: '**/package-lock.json'
+
+    # --- Backend Steps ---
+    - name: Install Backend Dependencies
+      run: npm ci
+      working-directory: ./backend
+
+    - name: Build Backend
+      run: npm run build --if-present
+      working-directory: ./backend
+
+    - name: Test Backend
+      run: npm test --if-present
+      working-directory: ./backend
+
+    # --- Admin Frontend Steps ---
+    - name: Install Admin Frontend Dependencies
+      run: npm ci
+      working-directory: ./frontend/Admin
+
+    - name: Build Admin Frontend
+      run: npm run build --if-present
+      working-directory: ./frontend/Admin
+
+    - name: Test Admin Frontend
+      run: npm test --if-present
+      working-directory: ./frontend/Admin
+
+    # --- User Frontend Steps ---
+    - name: Install User Frontend Dependencies
+      run: npm ci
+      working-directory: ./frontend/User
+
+    - name: Build User Frontend
+      run: npm run build --if-present
+      working-directory: ./frontend/User
+
+    - name: Test User Frontend
+      run: npm test --if-present
+      working-directory: ./frontend/User
