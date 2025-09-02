@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { 
     getProducts, 
     getProductById, 
@@ -11,6 +12,15 @@ import {
 import { protect, admin } from '../middleware/authMiddleware.js'; // For security
 
 const router = express.Router();
+
+// Rate limiter for delete requests (admin-only)
+const deleteLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute window
+    max: 5, // limit each IP to 5 delete requests per minute
+    message: "Too many delete requests, please try again later.",
+    standardHeaders: true, 
+    legacyHeaders: false,
+});
 
 // Routes for fetching products and creating a new one
 router.route('/')
@@ -27,6 +37,6 @@ router.get('/featured', getFeaturedProducts);
 router.route('/:id')
     .get(getProductById)
     .put(protect, admin, updateProduct)    // Update a product (admin only)
-    .delete(protect, admin, deleteProduct); // Delete a product (admin only)
+    .delete(protect, admin, deleteLimiter, deleteProduct); // Delete a product (admin only, rate-limited)
 
 export default router;
