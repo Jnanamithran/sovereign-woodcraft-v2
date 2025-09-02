@@ -34,38 +34,39 @@ jobs:
     # --- Backend Steps ---
     - name: Install Backend Dependencies
       run: npm ci
-      working-directory: ./backend
+      working-directory: ./sovereign-woodcraft/backend
 
     - name: Build Backend
       run: npm run build --if-present
-      working-directory: ./backend
+      working-directory: ./sovereign-woodcraft/backend
 
     - name: Test Backend
       run: npm test --if-present
-      working-directory: ./backend
+      working-directory: ./sovereign-woodcraft/backend
 
     # --- Admin Frontend Steps ---
     - name: Install Admin Frontend Dependencies
       run: npm ci
-      working-directory: ./frontend/Admin
+      working-directory: ./sovereign-woodcraft/frontend/Admin
 
     - name: Build Admin Frontend
       run: npm run build --if-present
-      working-directory: ./frontend/Admin
+      working-directory: ./sovereign-woodcraft/frontend/Admin
 
     - name: Test Admin Frontend
       run: npm test --if-present
-      working-directory: ./frontend/Admin
+      working-directory: ./sovereign-woodcraft/frontend/Admin
 
     # --- User Frontend Steps ---
     - name: Install User Frontend Dependencies
       run: npm ci
-      working-directory: ./frontend/User
+      working-directory: ./sovereign-woodcraft/frontend/User
 
     - name: Build User Frontend
       run: npm run build --if-present
-      working-directory: ./frontend/User
+      working-directory: ./sovereign-woodcraft/frontend/User
 
     - name: Test User Frontend
       run: npm test --if-present
-      working-directory: ./frontend/User
+      working-directory: ./sovereign-woodcraft/frontend/User
+
